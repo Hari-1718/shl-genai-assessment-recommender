@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-12-08T10:23:18.341Z",
+  "candidates": [
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\app\\favicon.ico\\route.ts",
+      "occurrences": 0,
+      "appearsIn": []
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\app\\manifest.ts",
+      "occurrences": 1,
+      "appearsIn": [
+        "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\app\\manifest.ts"
+      ]
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\SEOHead.tsx",
+      "occurrences": 1,
+      "appearsIn": [
+        "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\SEOHead.tsx"
+      ]
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\breadcrumb.tsx",
+      "occurrences": 1,
+      "appearsIn": [
+        "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\breadcrumb.tsx"
+      ]
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\calendar.tsx",
+      "occurrences": 0,
+      "appearsIn": []
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\glowing-effect.tsx",
+      "occurrences": 0,
+      "appearsIn": []
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\pagination.tsx",
+      "occurrences": 1,
+      "appearsIn": [
+        "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\pagination.tsx"
+      ]
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\textarea.tsx",
+      "occurrences": 1,
+      "appearsIn": [
+        "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\src\\components\\ui\\textarea.tsx"
+      ]
+    },
+    {
+      "file": "C:\\Users\\ragha\\OneDrive\\Desktop\\Portfolio\\public\\robots.txt",
+      "occurrences": 0,
+      "appearsIn": []
+    }
+  ]
+}
