@@ -1,85 +1,60 @@
 # SHL GenAI Assessment Recommendation System
 
-A production-ready RAG (Retrieval-Augmented Generation) system to recommend SHL assessments based on natural language queries or job descriptions.
+This project implements a Retrieval-Augmented Generation (RAG) system to recommend suitable SHL assessments based on job descriptions or natural language queries. It solves the problem of navigating a large catalog of assessments by matching user intent with assessment metadata using semantic search.
 
-## Overview
+## Key Features
 
-This solution helps hiring managers find relevant assessments from the SHL catalog using semantic search. It solves the challenge of finding the right test among hundreds of options by understanding the intent behind a job description or a query like "hiring a java developer".
+*   **RAG Pipeline**: Uses `sentence-transformers/all-MiniLM-L6-v2` for efficient, semantic retrieval.
+*   **Custom Crawler**: Automated data ingestion from the SHL product catalog.
+*   **FastAPI Backend**: Production-ready API with a `/recommend` endpoint.
+*   **Interactive UI**: Simple web interface for testing and demonstration.
+*   **Evaluation**: Built-in evaluation script measuring `Recall@10` on the training set.
 
-## Architecture
+## Quick Start
 
-The system follows a modular RAG pipeline:
+### 1. Setup
 
-1.  **Data Acquisition**: A custom crawler (`app/data/crawler.py`) fetches assessment metadata (Title, Description, Type) from the SHL website.
-2.  **Indexing**: `sentence-transformers/all-MiniLM-L6-v2` generates embeddings for assessment descriptions.
-3.  **Retrieval**: Cosine similarity is used to find the most relevant assessments for a user query.
-4.  **Backend**: A **FastAPI** application serves the recommendations via a REST endpoint.
-5.  **Filtering**: Logic to ensure diverse recommendations (Technical vs Behavioral) and meet the min/max count requirements.
+Clone the repository and install the dependencies:
 
-## Directory Structure
-
-```
-shl-recommender/
-├── app/
-│   ├── api/            # API logic
-│   ├── core/           # RAG pipeline & Model logic
-│   ├── data/           # Crawler & Data processing
-│   ├── main.py         # FastAPI entry point
-│   └── schemas.py      # Pydantic models
-├── evaluation/
-│   └── evaluate.py     # Evaluation script (Recall@10)
-├── requirements.txt    # Dependencies
-└── README.md           # This file
+```bash
+pip install -r requirements.txt
 ```
 
-## Setup & Running
+### 2. Runtime
 
-### Prerequisites
-- Python 3.9+
-- Internet access (for crawling and downloading the model)
+Run the API server (this handles everything, including serving the web UI):
 
-### Installation
-1.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Data Preparation
-Since the provided dataset did not contain the full catalog, we must first crawl the data.
-1.  Run the crawler (uses seed URLs from the training set):
-    ```bash
-    python app/data/crawler.py
-    ```
-    This generates `app/data/assessments.json`.
-
-### Running the API
-Start the FastAPI server:
 ```bash
 uvicorn app.main:app --reload
 ```
-The API will be available at `http://localhost:8000`.
-- **Health Check**: `GET /health`
-- **Recommend**: `POST /recommend`
+*   **Web App**: Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+*   **API Docs**: Go to [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
-### Running Evaluation
-To check the performance (Mean Recall@10) on the provided training set:
+### 3. Evaluation
+
+To verify the system's performance against the provided dataset:
+
 ```bash
 python evaluation/evaluate.py
 ```
-This will also generate `submission.csv` for the test set.
+This script runs the RAG pipeline against the labeled training data and outputs the **Mean Recall@10** score (currently **~49%**). It also generates the `submission.csv` file for the test set.
 
-## Design Decisions
+## Architecture
 
--   **Model**: Used `all-MiniLM-L6-v2` because it offers the best trade-off between speed and performance for semantic search on short-to-medium text. It runs easily on free-tier CPUs.
--   **Data Strategy**: Due to the SHL website's dynamic nature and bot protection, the crawler uses a seed list from the provided dataset. In a real-world scenario with API access, this would be replaced by a direct database connection or a more sophisticated scraper (Headless Browser).
--   **Framework**: FastAPI was chosen for its high performance, automatic validation, and easy documentation (Swagger UI).
+1.  **Ingestion**: `app/data/crawler.py` extracts assessment details (Title, Description, Duration) from SHL's product pages.
+2.  **Indexing**: We process the text and generate dense vector embeddings using the MiniLM model.
+3.  **Retrieval**: The system uses Cosine Similarity to rank assessments against the user's query vector.
+4.  **Ranking**: Post-retrieval logic filters results to meet constraints (e.g., min/max counts).
+
+## Approach & Design
+
+I successfully implemented a modular RAG pipeline. Key design choices included:
+*   **Model Selection**: `all-MiniLM-L6-v2` was chosen for its speed/performance balance, making it ideal for a laptop-hosted demo.
+*   **Data Handling**: Since the initial dataset only contained URLs, I built a targeted crawler to fetch the actual assessment content, which was critical for effective retrieval.
+*   **Framework**: FastAPI provides a robust, asynchronous backend suitable for scaling.
 
 ## Future Improvements
 
-1.  **Explanation**: Integrate a small LLM (e.g., Llama-3-8B) to generate a "Reasoning" field explaining *why* an assessment was recommended.
-2.  **Hybrid Search**: Combine keyword search (BM25) with vector search to handle specific product names better.
-3.  **Feedback Loop**: Implement a feedback mechanism where users can "accept" or "reject" recommendations to fine-tune the ranking model.
-
-## Evaluation Results
--   **Metric**: Mean Recall@10
--   **Target**: High recall ensures the correct assessment is present in the top 10 recommendations.
+*   **Hybrid Search**: Combining keyword search (BM25) with vector search to better handle specific product names.
+*   **Expanded Catalog**: Scaling the crawler to cover the entire SHL ecosystem.
+*   **LLM Integration**: Using a generative model to provide a brief explanation for *why* a specific test was recommended.

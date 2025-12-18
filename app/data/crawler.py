@@ -45,7 +45,7 @@ def crawl_catalog():
                 
             p_soup = BeautifulSoup(p_response.text, 'html.parser')
             
-            # extract metadata
+            # Extract metadata
             name = p_soup.find('h1').get_text(strip=True) if p_soup.find('h1') else "Unknown Assessment"
             
             description = ""
@@ -53,7 +53,6 @@ def crawl_catalog():
             if meta_desc:
                 description = meta_desc.get('content')
             
-            # Try to get more content from main div
             main_content = p_soup.find('article') or p_soup.find('main')
             if main_content:
                 description += " " + main_content.get_text(" ", strip=True)

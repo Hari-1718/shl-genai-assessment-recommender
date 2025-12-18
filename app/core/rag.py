@@ -37,22 +37,18 @@ class AssessmentRetriever:
 
     def load_resources(self):
         print("Loading RAG resources...")
-        # Load Data
         self.load_data()
 
-        # Load Model
         try:
             self.model = SentenceTransformer(MODEL_NAME)
         except Exception as e:
             print(f"Error loading model: {e}")
             raise
 
-        # Load or Create Index
         if os.path.exists(INDEX_PATH) and self.assessments:
             try:
                 with open(INDEX_PATH, 'rb') as f:
                     saved_data = pickle.load(f)
-                    # Simple check to ensure index matches data
                     if len(saved_data['embeddings']) == len(self.assessments):
                         self.embeddings = saved_data['embeddings']
                         print("Vector index loaded.")
@@ -107,19 +103,10 @@ class AssessmentRetriever:
         return results
 
     def recommend(self, query: str):
-        # 1. Retrieve candidate set (broader than final result)
         candidates = self.retrieve(query, top_k=20)
         
-        # 2. Logic to balance Technical vs Behavioral
-        # Simple heuristic: if query implies specific intent, prioritize that, 
-        # but generally ensure we have a mix if the query is broad.
-        
-        # For now, just return top 5-10
-        # Requirement: Min 5, Max 10.
-        
-        # Logic: 
-        # - Deduplicate by URL (just in case)
-        # - Filter low score garbage if any (threshold e.g. 0.2)
+        # Balance technical vs behavioral assessments logic could go here.
+        # Currently standard filtering to meet min 5, max 10 requirement.
         
         final_list = []
         seen_urls = set()
@@ -127,21 +114,18 @@ class AssessmentRetriever:
         for cand in candidates:
             if cand['url'] in seen_urls:
                 continue
-            if cand['score'] < 0.2: # arbitrary threshold
+            if cand['score'] < 0.2:
                 continue
                 
             seen_urls.add(cand['url'])
             
-            # Formatting as per requirement
-            
-            # Ensure safe access
             types = cand.get('test_type', ["General"])
             
             formatted = {
                 "url": cand.get('url', ''),
                 "name": cand.get('name', 'Unknown Assessment'),
-                "description": cand.get('description', '')[:200], # Brief description
-                "duration": cand.get('duration', 30), # Default or extracted
+                "description": cand.get('description', '')[:200],
+                "duration": cand.get('duration', 30),
                 "remote_support": cand.get('remote_support', "Yes"),
                 "adaptive_support": cand.get('adaptive_support', "No"),
                 "test_type": types
@@ -150,8 +134,5 @@ class AssessmentRetriever:
             
             if len(final_list) >= 10:
                 break
-                
-        # Ensure min 5 if possible (unless we don't have enough matches)
-        # If < 5, we return what we have. 
         
         return final_list

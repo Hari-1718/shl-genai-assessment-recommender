@@ -1,61 +1,51 @@
-# GenAI Assessment Recommendation: Project Report
+# Project Report: SHL GenAI Assessment Recommender
 
 ## 1. Executive Summary
-This project implements a **Retrieval-Augmented Generation (RAG)** system designed to recommend SHL assessments based on natural language queries or job descriptions. The system leverages state-of-the-art sentence embeddings to semantically match user intent with assessment metadata (Name, Description, Test Type).
 
-**Key Outcomes:**
-- **Functional API**: A FastAPI backend serving recommendations with < 200ms latency.
-- **Web Interface**: A clean, responsive UI for interactive testing.
-- **Data Pipeline**: A custom crawler that indexed 54+ unique assessments from the SHL catalog.
-- **Performance**: achieved a **Mean Recall@10 of 49.23%** on the validation dataset.
+This submission details the RAG (Retrieval-Augmented Generation) system I built to recommend SHL assessments based on natural language queries. By indexing assessment metadata with semantic embeddings, the system can understand user intent (e.g., "hire a manager in China") better than a simple keyword search.
+
+**Key Results:**
+- **Performance**: Achieved **49.23% Recall@10** on the training set.
+- **Coverage**: Crawled and indexed 54 unique assessments from the provided seed list.
+- **Usability**: Delivered a working API and a clean web interface for testing.
 
 ---
 
-## 2. Technical Architecture
+## 2. Technical Approach
 
-### 2.1 Data Ingestion Pipeline
-To overcome the limitation of the provided dataset (which contained only URLs), a robust web crawler was built using `requests` and `BeautifulSoup`.
-- **Seed Methodology**: Extracted unique URLs from the training set to target relevant "Individual Test Solutions."
-- **Metadata Extraction**: Parsed assessment names, detailed descriptions, durations, and support features (Remote/Adaptive).
-- **Normalization**: Cleaned text and standardized fields for indexing.
+### 2.1 Data Pipeline
+The provided dataset `Gen_AI Dataset.xlsx` contained URLs but no actual assessment content. To fix this, I wrote a custom crawler (`app/data/crawler.py`) that:
+1.  Visits each unique URL from the training set.
+2.  Extracts key metadata: **Name**, **Description**, **Duration**, and **Test Type**.
+3.  Cleans and normalizes the text for indexing.
 
-### 2.2 RAG Engine & Retrieval Strategy
-The core recommendation logic utilizes semantic vector search:
-- **Embedding Model**: `sentence-transformers/all-MiniLM-L6-v2`. This model was chosen for its optimal balance of speed and semantic capture.
-- **Vector Store**: In-memory `numpy` arrays for efficiency given the catalog size (< 1000 items).
-- **Indexing**: Assessment descriptions and names are concatenated and encoded into high-dimensional vectors.
-- **Retrieval**: Cosine similarity is used to rank assessments against the user query vector.
+### 2.2 RAG Engine
+I chose `sentence-transformers/all-MiniLM-L6-v2` for embeddings because it's fast and effective for short paragraphs.
+- **Indexing**: I concatenated the `name` and `description` of each assessment and encoded them into a vector space.
+- **Retrieval**: When a query comes in, I encode it and use **Cosine Similarity** to find the closest matching assessments.
+- **Ranking**: I implemented basic filtering to ensure we return between 5 and 10 results, per the requirements.
 
 ### 2.3 Application Layer
-- **Backend**: FastAPI was selected for its performance and native Pydantic integration.
-- **Frontend**: A lightweight HTML/JS interface communicates with the `/recommend` endpoint.
-- **Schema**: Enforces the required JSON output format:
-  ```json
-  { "url": "...", "name": "...", "description": "...", "duration": 30, ... }
-  ```
+- **Backend**: Built with **FastAPI** for low-latency responses.
+- **Frontend**: A simple HTML/JS dashboard `app/static/index.html` allows for easy interactive testing.
 
 ---
 
-## 3. Evaluation & Metrics
+## 3. Evaluation
 
-### 3.1 Methodology
-We employed **Recall@K** (specifically Recall@10) as the primary metric. This measures whether the "ground truth" assessment URL appears in the top 10 recommendations.
+I evaluated the system using **Recall@10**—checking if the *correct* assessment URL appeared in the top 10 results for each query in the training set.
 
-### 3.2 Results
-- **Dataset**: 65 labeled Query-URL pairs.
-- **Mean Recall@10**: **0.4923**
-- **Interpretation**: The system successfully retrieves the correct specific assessment in the top 10 results for nearly 50% of queries. This is a strong baseline considering many queries are broad (e.g., "Java Developer") and multiple assessments might be equally valid.
+- **Score**: **0.4923** (49%)
+- **Analysis**: This is a strong baseline. The model successfully disambiguates between similar tests (e.g., different types of Java assessments) about half the time without any fine-tuning.
 
 ---
 
-## 4. Future Improvements
+## 4. Next Steps
 
-1.  **Full Catalog Indexing**: Expand the crawler to traverse the entire SHL sitemap to improve coverage.
-2.  **Hybrid Search**: Combine semantic search with keyword filtering (BM25) to better handle specific product names or exact constraints (e.g., "40 minutes").
-3.  **Re-Ranking Model**: Implement a cross-encoder (e.g., `ms-marco-MiniLM`) to re-rank the top 20 results for higher precision at the top of the list.
-4.  **Feedback Loop**: Implement user feedback logging (thumbs up/down) to fine-tune embeddings over time.
-
----
+If I had more time, I would:
+1.  **Scale the Crawler**: Index the entire SHL catalog, not just the seed URLs.
+2.  **Hybrid Search**: extensive keyword matching (BM25) to handle exact product name lookups better.
+3.  **Re-Ranking**: Add a second pass using a cross-encoder to improve the ordering of the top 10 results.
 
 ## 5. Usage
 
