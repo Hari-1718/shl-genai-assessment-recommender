@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0');
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-primary: #1152d4;
+  /* Header height to offset fixed header; tweaked for mobile */
+  --header-height: 110px;
+
+  /* Backgrounds */
+  --color-background-light: #f6f6f8;
+  --color-background-dark: #101622;
+
+  /* Surfaces & Cards */
+  --color-surface-dark: #1c2333;
+  --color-surface-light: #ffffff;
+  --color-card-dark: #1a212e;
+
+  /* Borders */
+  --color-border-dark: #282e39;
+
+  /* Text */
+  --color-text-secondary: #9da6b9;
+
+  /* Fonts */
+  --font-display: "Manrope", "Space Grotesk", sans-serif;
+  --font-body: "Noto Sans", sans-serif;
+}
+
+@layer base {
+
+  /* Apply default fonts and dark mode backgrounds */
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-background-dark);
+    color: #e8edf7;
+    /* slightly brighter body copy */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100%;
+    padding-top: calc(var(--header-height) + 8px);
+  }
+
+  /* Apply display font to all headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    background: rgba(17, 82, 212, 0.18);
+    color: #f8fafc;
+  }
+
+  /* Smooth scrolling for anchor links */
+  html {
+    scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
+    min-height: 100%;
+  }
+
+  /* Give anchored sections breathing room beneath the fixed header */
+  [id] {
+    scroll-margin-top: calc(var(--header-height) + 20px);
+  }
+
+  p {
+    max-width: 72ch;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --header-height: 124px;
+  }
+  .hide-mobile-progress {
+    display: none;
+  }
+}
+
+@layer utilities {
+
+  /* Hide scrollbar for horizontal scrolling sections (used in Talent Solutions) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  /* Reusable gentle lift for CTAs */
+  .lift {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+
+  .lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(17, 82, 212, 0.25);
+  }
+
+  .lift:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(17, 82, 212, 0.2);
+  }
+
+  /* Normalize Material Symbols icon font appearance */
+  .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+  }
+
+  /* Reusable focus ring helper */
+  .focus-ring:focus-visible {
+    outline: 2px solid rgba(17, 82, 212, 0.7);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(17, 82, 212, 0.15);
+  }
+
+  /* Gentle animated gleam for hero overlays */
+  .hero-gleam {
+    background-image:
+      radial-gradient(circle at 18% 20%, rgba(17, 82, 212, 0.20), transparent 32%),
+      radial-gradient(circle at 78% 12%, rgba(255, 255, 255, 0.10), transparent 30%),
+      radial-gradient(circle at 50% 70%, rgba(17, 82, 212, 0.08), transparent 38%);
+    animation: heroPulse 12s ease-in-out infinite alternate;
+    opacity: 0.9;
+  }
+
+  /* Animated gradient veil for hero backgrounds */
+  .hero-gradient-overlay {
+    background: linear-gradient(135deg, rgba(17,82,212,0.14), rgba(82,144,255,0.10), rgba(255,255,255,0.08));
+    background-size: 160% 160%;
+    animation: heroGradient 14s ease-in-out infinite;
+    mix-blend-mode: screen;
+    opacity: 0.75;
+  }
+
+  /* Subtle noise texture for flat areas */
+  .noise-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E");
+    background-size: 240px 240px;
+    opacity: 0.25;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+  }
+
+  @keyframes heroPulse {
+    0% {
+      transform: translateY(0px) scale(1);
+      filter: saturate(1);
+    }
+    50% {
+      transform: translateY(-4px) scale(1.01);
+      filter: saturate(1.05);
+    }
+    100% {
+      transform: translateY(2px) scale(1);
+      filter: saturate(1);
+    }
+  }
+
+  @keyframes heroGradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
