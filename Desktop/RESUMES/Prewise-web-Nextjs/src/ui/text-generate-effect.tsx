@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface TextGenerateEffectProps {
   text: string;
   className?: string;
-  speedMs?: number; // lower is faster
+  speedMs?: number;
   startDelayMs?: number;
 }
 
@@ -14,24 +14,35 @@ export function TextGenerateEffect({
   startDelayMs = 0,
 }: TextGenerateEffectProps) {
   const [visible, setVisible] = useState(0);
+  const intervalRef = useRef<number | null>(null);
   const chars = Array.from(text);
 
   useEffect(() => {
     setVisible(0);
-    const startTimer = window.setTimeout(() => {
-      const interval = window.setInterval(() => {
+
+    const clearRunningInterval = () => {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+
+    const delayTimer = window.setTimeout(() => {
+      intervalRef.current = window.setInterval(() => {
         setVisible((prev) => {
           if (prev >= chars.length) {
-            window.clearInterval(interval);
+            clearRunningInterval();
             return prev;
           }
           return prev + 1;
         });
       }, speedMs);
-      return () => window.clearInterval(interval);
     }, startDelayMs);
 
-    return () => window.clearTimeout(startTimer);
+    return () => {
+      window.clearTimeout(delayTimer);
+      clearRunningInterval();
+    };
   }, [text, speedMs, startDelayMs, chars.length]);
 
   return (

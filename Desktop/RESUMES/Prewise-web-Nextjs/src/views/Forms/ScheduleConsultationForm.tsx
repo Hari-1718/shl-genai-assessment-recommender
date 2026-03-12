@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getSupabaseClient } from '../../lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
+import { isValidEmail, isPersonalEmail, isTextOnly, isValidPhone } from '@/lib/validation';
 
-const ScheduleConsultationForm: React.FC = () => {
+export default function ScheduleConsultationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Normalize context so we reliably route partner submissions to their own table.
@@ -73,10 +74,10 @@ const ScheduleConsultationForm: React.FC = () => {
   const currentContext = contextLabels[context] || contextLabels.general;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
@@ -84,9 +85,14 @@ const ScheduleConsultationForm: React.FC = () => {
     if (["companyName", "firstName", "lastName", "email", "projectDetails"].includes(name) && !value) {
       return "This field is required";
     }
+    if ((name === "firstName" || name === "lastName") && value && !isTextOnly(value)) {
+      return "Name must contain only letters";
+    }
     if (name === "email") {
-      const emailOk = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value.trim());
-      if (!emailOk) return "Enter a valid email";
+      if (!isValidEmail(value)) return "Enter a valid email";
+    }
+    if (name === "phone" && value && !isValidPhone(value)) {
+      return "Enter a valid phone number";
     }
     if (name === "timeline" && !hideBudgetTimeline && !value) {
       return "Please select a timeline";
@@ -94,21 +100,13 @@ const ScheduleConsultationForm: React.FC = () => {
     return "";
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrorString(null);
     setToast(null);
     setIsSubmitting(true);
 
-    // Normalize and validate email to align with DB constraints.
     const normalizedEmail = formData.email.trim().toLowerCase();
-    const emailIsValid = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(normalizedEmail);
-    const domain = normalizedEmail.split('@')[1] || '';
-    const allowlistedDomains = new Set(['prewise.in', 'prewise.co', 'prewise.io']);
-    const personalDomains = new Set([
-      'gmail.com', 'yahoo.com', 'yahoo.co.in', 'hotmail.com', 'outlook.com', 'live.com', 'msn.com', 'icloud.com', 'me.com',
-      'aol.com', 'proton.me', 'protonmail.com', 'gmx.com', 'pm.me', 'yandex.com', 'yandex.ru', 'mail.ru'
-    ]);
 
     const requiredFields = ["companyName", "firstName", "lastName", "email", "projectDetails"] as const;
     const newTouched: Record<string, boolean> = {};
@@ -122,27 +120,35 @@ const ScheduleConsultationForm: React.FC = () => {
       newTouched.timeline = true;
       if (!formData.timeline) hasError = true;
     }
+    // Validate optional fields that have format rules
+    if (formData.phone) {
+      newTouched.phone = true;
+      if (validateField("phone", formData.phone)) hasError = true;
+    }
     setTouched((prev) => ({ ...prev, ...newTouched }));
 
-    if (!emailIsValid) {
+    if (hasError) {
+      setErrorString("Please correct the highlighted fields.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
       setErrorString('Please enter a valid work email address.');
       setIsSubmitting(false);
       return;
     }
 
-    if (!allowlistedDomains.has(domain) && personalDomains.has(domain)) {
+    if (isPersonalEmail(normalizedEmail)) {
       setErrorString('That email does not meet our policy. Please use your company domain email.');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      // Use a dedicated table for partner discussions to keep data isolated from other consultations.
       const targetTable = isPartnersContext ? 'partner_requests' : 'consultations';
-
       const supabase = getSupabaseClient();
 
-      // Build payload to match the destination table shape.
       const payload: Record<string, string | null> = {
         context: context,
         company_name: formData.companyName,
@@ -173,14 +179,10 @@ const ScheduleConsultationForm: React.FC = () => {
         throw error;
       }
 
-      // Automatically send email notification securely via FormSubmit
       try {
         await fetch("https://formsubmit.co/ajax/connect@prewise.in", {
           method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
             _subject: `New Prewise Consultation Request: ${formData.companyName}`,
             Context: currentContext.title,
@@ -194,10 +196,8 @@ const ScheduleConsultationForm: React.FC = () => {
             ProjectDetails: formData.projectDetails,
           })
         });
-      } catch (emailErr) {
-        // We log silently and do not break the UI if the network blocked the notification 
-        // since the user's data is already successfully saved to the database.
-        console.error("Email notification failed to send:", emailErr);
+      } catch {
+        // Email notification is non-critical; the form data is already saved to the database.
       }
 
       setSubmitted(true);
@@ -300,6 +300,9 @@ const ScheduleConsultationForm: React.FC = () => {
                 className="w-full bg-[#101622] border border-[#2d3546] rounded-lg px-4 py-3 text-white focus:border-[#1152d4] focus:outline-none transition-colors focus-ring"
                 placeholder="+1 (555) 123-4567"
               />
+              {touched.phone && validateField("phone", formData.phone) && (
+                <p className="mt-2 text-xs text-red-300">{validateField("phone", formData.phone)}</p>
+              )}
             </div>
           </div>
 
@@ -480,6 +483,4 @@ const ScheduleConsultationForm: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default ScheduleConsultationForm;
+}

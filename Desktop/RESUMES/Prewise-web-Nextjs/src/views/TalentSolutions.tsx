@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import AnimatedStat from "../components/AnimatedStat";
 import { useState, useEffect } from "react";
@@ -126,15 +128,11 @@ export default function TalentSolutions() {
           throw error;
         }
         if (data && data.length > 0) {
-          // Note: In an actual production environment we might have to map column names here 
-          // like status_color -> statusColor if the shape doesn't match exactly.
           setRoles(data as Job[]);
         } else {
           setRoles(FALLBACK_ROLES);
         }
-      } catch (err) {
-        console.error("Error fetching jobs from supabase", err);
-        // Fallback array if connection fails or table doesn't exist yet
+      } catch {
         setRoles(FALLBACK_ROLES);
       } finally {
         setLoading(false);

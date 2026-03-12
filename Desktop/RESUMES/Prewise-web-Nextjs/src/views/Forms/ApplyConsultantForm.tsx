@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getSupabaseClient } from '../../lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
+import { isValidEmail, isTextOnly, isValidUrl } from '@/lib/validation';
 
-const ApplyConsultantForm: React.FC = () => {
+export default function ApplyConsultantForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialRole = searchParams?.get('role') || '';
@@ -31,9 +32,14 @@ const ApplyConsultantForm: React.FC = () => {
     if (["firstName", "lastName", "email", "location", "role", "engagement"].includes(name) && !value) {
       return "This field is required";
     }
-    if (name === "email" && typeof value === "string") {
-      const emailOk = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(value.trim());
-      if (!emailOk) return "Enter a valid email";
+    if ((name === "firstName" || name === "lastName") && typeof value === "string" && value && !isTextOnly(value)) {
+      return "Name must contain only letters";
+    }
+    if (name === "email" && typeof value === "string" && !isValidEmail(value)) {
+      return "Enter a valid email";
+    }
+    if (name === "linkedIn" && typeof value === "string" && value && !isValidUrl(value)) {
+      return "Enter a valid URL (e.g. https://linkedin.com/in/...)";
     }
     if (name === "resume" && !value) {
       return "Please attach your resume";
@@ -60,20 +66,20 @@ const ApplyConsultantForm: React.FC = () => {
     { value: 'flexible', label: 'Flexible' },
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFormData({ ...formData, resume: e.target.files[0] });
+      setFormData((prev) => ({ ...prev, resume: e.target.files![0] }));
       setTouched((prev) => ({ ...prev, resume: true }));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrorString(null);
     setToast(null);
@@ -87,6 +93,11 @@ const ApplyConsultantForm: React.FC = () => {
       const err = validateField(field, (formData as any)[field]);
       if (err) hasError = true;
     });
+    // Validate optional fields that have format rules
+    if (formData.linkedIn) {
+      newTouched.linkedIn = true;
+      if (validateField("linkedIn", formData.linkedIn)) hasError = true;
+    }
     setTouched((prev) => ({ ...prev, ...newTouched }));
     if (hasError) {
       setErrorString("Please correct the highlighted fields.");
@@ -98,7 +109,6 @@ const ApplyConsultantForm: React.FC = () => {
       const supabase = getSupabaseClient();
       let fileUrl: string | null = null;
 
-      // 1. Upload the resume file to Supabase Storage if one was selected
       if (formData.resume) {
         const fileExt = formData.resume.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -112,7 +122,6 @@ const ApplyConsultantForm: React.FC = () => {
           throw new Error(`Failed to upload resume: ${uploadError.message}`);
         }
 
-        // Get the public URL for the newly uploaded file
         const { data } = supabase.storage
           .from('resumes')
           .getPublicUrl(filePath);
@@ -120,7 +129,6 @@ const ApplyConsultantForm: React.FC = () => {
         fileUrl = data?.publicUrl ?? null;
       }
 
-      // 2. Insert the application data into the DB
       const { error: dbError } = await supabase
         .from('applications')
         .insert([
@@ -133,7 +141,7 @@ const ApplyConsultantForm: React.FC = () => {
             engagement: formData.engagement,
             linkedin: formData.linkedIn,
             message: formData.message,
-            resume_url: fileUrl, // Save the file URL we just generated
+            resume_url: fileUrl,
           }
         ]);
 
@@ -141,14 +149,10 @@ const ApplyConsultantForm: React.FC = () => {
         throw dbError;
       }
 
-      // Automatically send email notification securely via FormSubmit
       try {
         await fetch("https://formsubmit.co/ajax/connect@prewise.in", {
           method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
             _subject: `New Consultant Application: ${formData.firstName} ${formData.lastName}`,
             Role: formData.role,
@@ -161,8 +165,8 @@ const ApplyConsultantForm: React.FC = () => {
             Resume_URL: fileUrl || "No resume uploaded",
           })
         });
-      } catch (emailErr) {
-        console.error("Email notification failed to send:", emailErr);
+      } catch {
+        // Email notification is non-critical; application data is already saved.
       }
 
       setSubmitted(true);
@@ -366,6 +370,9 @@ const ApplyConsultantForm: React.FC = () => {
               className="w-full bg-[#101622] border border-[#2d3546] rounded-lg px-4 py-3 text-white focus:border-[#1152d4] focus:outline-none transition-colors focus-ring"
               placeholder="https://linkedin.com/in/john-doe"
             />
+            {touched.linkedIn && validateField("linkedIn", formData.linkedIn) && (
+              <p className="mt-2 text-xs text-red-300">{validateField("linkedIn", formData.linkedIn)}</p>
+            )}
           </div>
 
           <div className="mb-6">
@@ -434,6 +441,4 @@ const ApplyConsultantForm: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default ApplyConsultantForm;
+}

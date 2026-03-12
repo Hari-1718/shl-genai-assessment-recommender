@@ -2,8 +2,25 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import PrewiseLogo from "../assets/PrewiseLogo.png";
+
+const SEARCH_ROUTE_KEYWORDS: Record<string, string> = {
+  expertise: "/expertise",
+  deeptech: "/expertise",
+  talent: "/talent-solutions",
+  product: "/product-consulting",
+  about: "/about",
+  join: "/join-us",
+  consult: "/form/schedule-consultation",
+};
+
+const NAV_LINKS = [
+  { name: "Product Consulting", path: "/product-consulting" },
+  { name: "DeepTech Consulting", path: "/expertise" },
+  { name: "Talent Solutions", path: "/talent-solutions" },
+  { name: "About Us", path: "/about" },
+];
 
 export default function Header() {
   const pathname = usePathname();
@@ -27,39 +44,22 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🔥 Smart Search Navigation
-  const routes: Record<string, string> = {
-    expertise: "/expertise",
-    deeptech: "/expertise",
-    talent: "/talent-solutions",
-    product: "/product-consulting",
-    about: "/about",
-    join: "/join-us",
-    consult: "/form/schedule-consultation",
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: FormEvent) => {
     e.preventDefault();
-
     const query = search.toLowerCase().trim();
     if (!query) return;
 
-    const matchedRoute = Object.keys(routes).find((key) =>
+    const matchedKeyword = Object.keys(SEARCH_ROUTE_KEYWORDS).find((key) =>
       query.includes(key)
     );
+    const destination = matchedKeyword
+      ? SEARCH_ROUTE_KEYWORDS[matchedKeyword]
+      : `/search?query=${encodeURIComponent(query)}`;
 
-    router.push(matchedRoute ? routes[matchedRoute] : `/search?query=${encodeURIComponent(query)}`);
+    router.push(destination);
     setSearch("");
     setIsMenuOpen(false);
   };
-
-  const navLinks = [
-    { name: "Product Consulting", path: "/product-consulting" },
-    { name: "DeepTech Consulting", path: "/expertise" },
-    { name: "Talent Solutions", path: "/talent-solutions" },
-    { name: "About Us", path: "/about" },
-    // partners removed from the main nav; accessible via CTA button
-  ];
 
   return (
     <header
@@ -74,6 +74,7 @@ export default function Header() {
         {/* LEFT SIDE */}
         <div className="flex items-center gap-8">
           <Link
+            prefetch
             href="/"
             onClick={() => setIsMenuOpen(false)}
             className="flex items-center gap-3 text-white hover:opacity-85 transition-opacity"
@@ -96,12 +97,12 @@ export default function Header() {
             </h2>
           </Link>
 
-          {/* DESKTOP NAVIGATION */}
           <nav className="hidden xl:flex items-center gap-7">
-            {navLinks.map((link) => {
+            {NAV_LINKS.map((link) => {
               const isActive = pathname === link.path;
               return (
                 <Link
+                  prefetch
                   key={link.name}
                   href={link.path}
                   className={`text-[15px] font-medium transition-colors focus-ring ${isActive
@@ -143,6 +144,7 @@ export default function Header() {
           {/* DESKTOP CTA BUTTONS */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
+              prefetch
               href="/form/schedule-consultation?context=general"
               className="bg-[#1152d4] hover:bg-[#1152d4]/90 text-white px-5 py-2.5 rounded-md text-[15px] font-semibold tracking-[0.01em] transition-all shadow-lg shadow-[#1152d4]/20 whitespace-nowrap lift focus-ring"
             >
@@ -150,12 +152,14 @@ export default function Header() {
             </Link>
 
             <Link
+              prefetch
               href="/join-us"
               className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-md text-[15px] font-semibold tracking-[0.01em] transition-all backdrop-blur-sm whitespace-nowrap lift focus-ring"
             >
               Join Prewise
             </Link>
             <Link
+              prefetch
               href="/partners"
               className="bg-secondary/10 hover:bg-secondary/20 border border-white/60 text-white px-5 py-2.5 rounded-md text-[15px] font-semibold tracking-[0.01em] transition-all whitespace-nowrap lift focus-ring"
             >
@@ -186,10 +190,11 @@ export default function Header() {
       {isMenuOpen && (
         <div className="xl:hidden flex flex-col bg-[#101622]/95 border-t border-[#2d3546] px-6 py-4 shadow-xl backdrop-blur-xl">
           <nav className="flex flex-col gap-4 mb-4">
-            {navLinks.map((link) => {
+            {NAV_LINKS.map((link) => {
               const isActive = pathname === link.path;
               return (
                 <Link
+                  prefetch
                   key={link.name}
                   href={link.path}
                   onClick={() => setIsMenuOpen(false)}
@@ -224,6 +229,7 @@ export default function Header() {
 
           <div className="flex flex-col gap-3">
             <Link
+              prefetch
               href="/form/schedule-consultation?context=general"
               onClick={() => setIsMenuOpen(false)}
               className="bg-[#1152d4] text-white text-center px-5 py-3 rounded-lg text-base font-bold transition-colors duration-300 ease-out"
@@ -231,6 +237,7 @@ export default function Header() {
               Schedule Consultation
             </Link>
             <Link
+              prefetch
               href="/join-us"
               onClick={() => setIsMenuOpen(false)}
               className="bg-white/10 border border-white/20 text-white text-center px-5 py-3 rounded-lg text-base font-bold transition-colors duration-300 ease-out"
@@ -238,6 +245,7 @@ export default function Header() {
               Join Prewise
             </Link>
             <Link
+              prefetch
               href="/partners"
               onClick={() => setIsMenuOpen(false)}
               className="bg-transparent border border-white text-white text-center px-5 py-3 rounded-lg text-base font-bold transition-colors duration-300 ease-out"

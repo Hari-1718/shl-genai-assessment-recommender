@@ -17,6 +17,7 @@ export default function Footer() {
           </p>
           <div className="flex gap-4 mt-6">
             <Link
+              prefetch
               aria-label="Prewise Home"
               className="text-[#9da6b9] hover:text-white transition-colors hover:scale-110 duration-200"
               href="/"
@@ -31,6 +32,7 @@ export default function Footer() {
               <span className="material-symbols-outlined">mail</span>
             </a>
             <Link
+              prefetch
               aria-label="Schedule Consultation"
               className="text-[#9da6b9] hover:text-white transition-colors hover:scale-110 duration-200"
               href="/form/schedule-consultation"
@@ -54,27 +56,27 @@ export default function Footer() {
           <p className="text-[11px] uppercase tracking-[0.18em] text-[#6f7a92] font-semibold mb-2">Services</p>
           <h4 className="text-white font-bold mb-3 font-display leading-tight">Consulting & Talent</h4>
           <ul className="space-y-2 text-[#9da6b9] text-sm">
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/product-consulting">Product Management Consulting</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/product-consulting#startup-advisory">Startup Advisory</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/expertise#vlsi-design">VLSI Design</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/expertise#embedded-systems">Embedded Systems</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/expertise#ai-ml">AI &amp; Machine Learning</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/expertise#generative-ai">Generative AI</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/expertise#quant-finance">Quantitative Finance</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/expertise#data-analytics">Data Science &amp; Analytics</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/product-consulting">Product Management Consulting</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/product-consulting#startup-advisory">Startup Advisory</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/expertise#vlsi-design">VLSI Design</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/expertise#embedded-systems">Embedded Systems</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/expertise#ai-ml">AI &amp; Machine Learning</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/expertise#generative-ai">Generative AI</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/expertise#quant-finance">Quantitative Finance</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/expertise#data-analytics">Data Science &amp; Analytics</Link></li>
           </ul>
         </div>
         <div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-[#6f7a92] font-semibold mb-2">Company</p>
           <h4 className="text-white font-bold mb-3 font-display leading-tight">Explore Prewise</h4>
           <ul className="space-y-2 text-[#9da6b9] text-sm">
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/about">About Us</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/join-us">Careers</Link></li>
-            <li><Link className="hover:text-[#1152d4] transition-colors" href="/partners">Partners</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/about">About Us</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/join-us">Careers</Link></li>
+            <li><Link prefetch className="hover:text-[#1152d4] transition-colors" href="/partners">Partners</Link></li>
           </ul>
           <div className="mt-5 p-4 rounded-lg bg-white/5 border border-white/10">
             <p className="text-white font-semibold text-sm mb-2">Schedule a call</p>
-            <Link href="/form/schedule-consultation?context=footer" className="inline-flex items-center gap-2 text-[#b5c4f5] hover:text-white text-sm font-medium transition-colors focus-ring">
+            <Link prefetch href="/form/schedule-consultation?context=footer" className="inline-flex items-center gap-2 text-[#b5c4f5] hover:text-white text-sm font-medium transition-colors focus-ring">
               Talk to an expert
               <span className="material-symbols-outlined text-[16px]">arrow_outward</span>
             </Link>

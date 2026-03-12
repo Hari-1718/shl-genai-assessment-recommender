@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 
 const PARTNERS_HERO = "https://lh3.googleusercontent.com/aida-public/AB6AXuAcO2QNW0_w0w0qNKPcKQcebZB6ckyHE32iIdh1NCh_cEFtUuedrrDWFwX_vkTMzq5rL5YJ2b73XzdPNq7Z-kK3IjN5J9f8NcPhtxhV7ByKSPxad3PGoCCxMhZXJTFJVNm7FTC3XoqvMg6QEvPDrei4gla0P3cf-5bDlYKWc6wcZV27Rt8XLP-wxHA-7tuPZfkPHYS9XblOuNwxmHu2oMF0mWEsM5I2RHv4alzM66ppoe54lzqflx3oNStPd5eYGlxvY4khcqFjSuKl";
