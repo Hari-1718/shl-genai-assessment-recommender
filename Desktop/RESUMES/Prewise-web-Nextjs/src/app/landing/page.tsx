@@ -100,8 +100,8 @@ export default function LandingPage() {
               startDelayMs={650}
             />
           </h1>
-          <p className="text-slate-200 text-lg md:text-xl max-w-3xl leading-relaxed">
-            Build frontier products with Prewise. Tell us who you are so we can collaborate in the right way.
+          <p className="text-slate-200 text-xl md:text-2xl max-w-3xl leading-relaxed">
+            Build Your Next Product Bet with On-Demand Product Leadership. Tell us who you are so we can collaborate in the right way.
           </p>
 
           <div className="w-full max-w-4xl space-y-3 pt-2">
